@@ -5,6 +5,7 @@
     2. выход пользователя
 2. [Я как юзер запрашиваю фидбек](https://www.figma.com/file/kQtf0dgTcOnxS7Y4TvwJKr/Assessment?type=design&node-id=657-15388&t=YFXsFUfOlcMXbtcs-0)
     1. отправка списка пользователей которых мы можем попросить об оценке
+    2. отправка ревью выбранным пользователям
 3. [Мои оценки](https://www.figma.com/file/kQtf0dgTcOnxS7Y4TvwJKr/Assessment?type=design&node-id=595-10831&t=YFXsFUfOlcMXbtcs-0)
     1. отправка списка вопросов с ответами от пользователей
 4. [Добавление респондента](https://www.figma.com/file/kQtf0dgTcOnxS7Y4TvwJKr/Assessment?type=design&node-id=613-22945&t=YFXsFUfOlcMXbtcs-0) 
@@ -21,26 +22,18 @@
     1. сохранение формы в draft
     2. отправка списка вопросов
     3. сохранение ответа пользователя
-
-
-
-
-
-
-
-
-
+    4. функция сброса опросника т.к пользователь не работает с данным колллегой
 
 # 3. я, как лид и/или ментор, просматриваю чужие оценки (тех, кто поделился со мной? или кто прикреплён ко мне?)
 1. [Расшаренные со мной](https://www.figma.com/file/kQtf0dgTcOnxS7Y4TvwJKr/Assessment?type=design&node-id=592-10676&t=YFXsFUfOlcMXbtcs-0)
     1. отправка пользоватлей которым админ назначил ревью
 2. [Расшаренная оценка версия 1](https://www.figma.com/file/kQtf0dgTcOnxS7Y4TvwJKr/Assessment?type=design&node-id=613-24708&t=YFXsFUfOlcMXbtcs-0)
-    1. фильтрация пользователей и отправка раздельно тех кто оставил отзыв и тех кто не оставил
+    1. отправка пользователей (с флагами о прохождении review)
     2. отправка вопросов
     3. отправка ответов пользователей прошедших опрос
 
 3. [Расшаренная оценка версия 2](https://www.figma.com/file/kQtf0dgTcOnxS7Y4TvwJKr/Assessment?type=design&node-id=812-25121&t=YFXsFUfOlcMXbtcs-0)
-    1. фильтрация пользователей и отправка раздельно тех кто оставил отзыв и тех кто не оставил
+    1. отправка пользователей (с флагами о прохождении review)
     2. отправка вопросов
     3. отправка ответов пользователей прошедших опрос
 
