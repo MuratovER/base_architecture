@@ -29,7 +29,7 @@
     1. [версия 1](https://www.figma.com/file/kqtf0dgtconxs7y4tvwjkr/assessment?type=design&node-id=613-24708&t=yfxsfufolcmxbtcs-0)
 
     2. [версия 2](https://www.figma.com/file/kqtf0dgtconxs7y4tvwjkr/assessment?type=design&node-id=812-25121&t=yfxsfufolcmxbtcs-0)
-    * фильтрация пользователей и отправка отдельно тех кто оставил отзыв и тех кто не оставил
+    * фильтрация пользователей и отправка раздельно тех кто оставил отзыв и тех кто не оставил
     * отправка вопросов
     * отправка ответов пользователей прошедших опрос
 
@@ -53,41 +53,4 @@
 2. [приглашение в компанию по ссылке](https://www.figma.com/file/kqtf0dgtconxs7y4tvwjkr/assessment?type=design&node-id=488-9483&t=yfxsfufolcmxbtcs-0)
 
 3. [изменение информации о пользователе](https://www.figma.com/file/kqtf0dgtconxs7y4tvwjkr/assessment?type=design&node-id=488-9483&t=yfxsfufolcmxbtcs-0)
-
-
-
-
-# Mодели:
-## 1. Mодель шаблона
-* название шаблона
-* вопросы -> модель-вопроса(onetomany)
-```
-множественный выбор вопросов в дроп на фронте
-```
-
-## 2. Mодель вопроса
-* вопрос
-* описание вопроса
-* ответа на вопрос
-
-## Модель ответа
-* Вопрос -> Модель вопроса()
-* Draft(Bool) 
-
-## 3. Модель пользователя:
-* имя
-* никнейм
-* почта
-* баланс пособия
-* роль(choice) hr || employee
-* статус(choice) active || suspended
-* 3 пермишена - ползьователь, админ, пм
-
-## 4. Mодель оценки
-* шаблон(choice) -> [onetoone](#модель-шаблона)
-* о каком пользователе собираем информацию -> [onetoone](#модель-пользователя)
-* кому отправить(multiplechoice) -> [onetomany](#модель-пользователя)
-* mentor -> [onetoone](#модель-пользователя) c пермишеном admin
-* lead -> [onetoone](#модель-пользователя) c пермишеном admin
-
 
