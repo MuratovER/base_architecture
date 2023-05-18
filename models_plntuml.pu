@@ -1,0 +1,40 @@
+@startuml
+
+
+map Template {
+    id => PK
+    question_id => FK
+    name_of_survey =>
+}
+
+map Questions {
+    id => PK
+    question =>
+    description =>
+}
+
+map User {
+    id => PK
+    template_id => FK
+    full_name => 
+    username =>
+    password =>
+    email =>
+    monthly_allowance_balance =>
+    role =>
+    status =>
+}
+
+map Review {
+    id => PK
+    user_id => FK
+    custom_template_id => FK
+}
+
+Questions --> Template::question_id
+Template --> Review::custom_template_id
+Template --> User::template_id
+User --> Review::user_id
+
+
+@enduml
