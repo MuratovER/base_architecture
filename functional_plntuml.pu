@@ -1,0 +1,120 @@
+@startuml
+participant FrontEnd
+participant BackEnd
+database SQL
+
+
+note left BackEnd: общие функции для всех ролей на всех экрана
+== Получение пользователя ==
+FrontEnd -> BackEnd: HTTP GET: request_user
+BackEnd -> SQL: PSQL: get_user
+SQL --> BackEnd: PSQL: user
+BackEnd --> FrontEnd: HTTP: 200 OK
+
+alt user not found
+    FrontEnd -> BackEnd: HTTP GET: request_user
+    BackEnd -> SQL: PSQL: get_user
+    SQL --> BackEnd: PSQL: None
+    BackEnd --> FrontEnd: HTTP: 400 BadRequest ->request_user()
+end
+
+== Выход пользователя ==
+FrontEnd -> BackEnd: HTTP POST: logout
+BackEnd --> FrontEnd: HTTP: 200 OK
+== Аутентификация пользователя email/password ==
+FrontEnd -> BackEnd: HTTP POST: login_by_jwt
+BackEnd -> SQL: PSQL: get user
+SQL --> BackEnd: PSQL: user
+BackEnd -> BackEnd: create_access_token
+BackEnd -> BackEnd: create_refresh_token
+BackEnd --> FrontEnd: HTTP: 200 OK
+alt incorrect email or password
+FrontEnd -> BackEnd: HTTP POST: login_by_jwt
+BackEnd -> SQL: PSQL: get user
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP: 400 BadRequest "Incorrect email or password"
+end
+== Аутентификация польователя через gmail == 
+FrontEnd -> BackEnd: HTTP POST: login_by_gmail
+BackEnd --> FrontEnd: HTTP: 200 OK
+alt incorrect email or password
+FrontEnd -> BackEnd: HTTP POST: login_by_gmail
+BackEnd --> FrontEnd: HTTP: 400 BadRequest "Incorrect email"
+end
+
+
+== Общие ошибки == 
+group Exeptions
+alt usern not authenticated
+    FrontEnd -> BackEnd: HTTP GET: request_user
+    BackEnd --> FrontEnd: HTTP: 401 Unathorized
+    note left BackEnd: Юзер не авторизовался
+end
+end
+
+note left BackEnd: сотрудник
+== Получить активную оценку ==
+
+FrontEnd -> BackEnd: HTTP GET: get_review
+BackEnd -> SQL: PSQL: get review
+SQL --> BackEnd: PSQL: review
+BackEnd --> FrontEnd: HTTP: 200 OK
+FrontEnd -> BackEnd: HTTP GET: get_feedback_request
+
+alt Если есть фидбек
+BackEnd -> SQL: PSQL: get feedback
+SQL --> BackEnd: PSQL: feedback
+BackEnd --> FrontEnd: HTTP 200 OK
+FrontEnd -> BackEnd: HTTP GET: get_my_feedback
+alt Если есть список моих фидбеков
+BackEnd -> SQL: PSQL: get my feedback
+SQL --> BackEnd: PSQL: my feedback
+BackEnd --> FrontEnd: HTTP 200 OK
+else Если моих фидбеков нет
+BackEnd -> SQL: PSQL: get my feedback
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP: 200 OK
+end
+
+else Если запроса фидбека нет
+BackEnd -> SQL: PSQL: get feedback
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP: 200 OK
+end
+
+== Получить список пользователей, которым я могу отправить запрос на фидбэк == 
+FrontEnd ->  BackEnd: HTTP GET: get_users_list 
+BackEnd -> SQL: PSQL: get users
+SQL --> BackEnd: PSQL: users
+BackEnd --> FrontEnd: HTTP: 200 OK
+
+== Создать запроса фидбека ==
+FrontEnd -> BackEnd: HTTP POST: create_review
+BackEnd -> SQL: PSQL: create review
+SQL --> BackEnd: PSQL: review created
+BackEnd --> FrontEnd: HTTP: 201 Created
+
+== Получить список моих фидбэков (вопросы - ответы) ==
+FrontEnd -> BackEnd: HTTP GET: get_my_feedback
+BackEnd -> SQL: PSQL: get my feedback
+SQL --> BackEnd: PSQL: my feedback
+BackEnd --> FrontEnd: HTTP: 200 OK
+
+== Получить список запросов фидбэка, которые прислали мне ==
+FrontEnd -> BackEnd: HTTP GET: get_feedback_request
+BackEnd -> SQL: PSQL: get feedback
+SQL --> BackEnd: PSQL: feedback
+BackEnd --> FrontEnd: HTTP: 200 OK
+
+== Получить список вопросов по запросу фидбэка == 
+FrontEnd -> BackEnd: HTTP GET: get_questions_by_review
+BackEnd -> SQL: PSQL: get questions
+SQL --> BackEnd: PSQL: questions
+BackEnd --> FrontEnd: HTTP: 200 OK
+
+== Сохринть фидбэк в draft == 
+
+== Отправить филбэк == 
+
+note left BackEnd: Админ
+@enduml

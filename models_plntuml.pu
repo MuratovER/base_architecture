@@ -7,7 +7,7 @@ map Template {
     name_of_survey =>
 }
 
-map Questions {
+map Question {
     id => PK
     question =>
     description =>
@@ -18,23 +18,39 @@ map User {
     template_id => FK
     full_name => 
     username =>
-    password =>
     email =>
-    monthly_allowance_balance =>
     role =>
     status =>
 }
 
-map Review {
+map Answer{
     id => PK
-    user_id => FK
-    custom_template_id => FK
+    user_id => FK 
+    answer_id => FK
+    question_id => FK
 }
 
-Questions --> Template::question_id
-Template --> Review::custom_template_id
+map Review {
+    id => PK
+    users_id => FK
+    custom_template_id => FK
+    answer_ids => FK 
+    is_draft =>
+}
+
+map Quarter_review {
+    id => PK
+    review_id => FK
+    period =>
+}
+
+Template --> Review::template_id
+Question --> Template::question_id
+Question --> Answer::question_id
 Template --> User::template_id
 User --> Review::user_id
+Answer --> Review::answer_id
+Review --> Quarter_review::review_id
 
 
 @enduml
