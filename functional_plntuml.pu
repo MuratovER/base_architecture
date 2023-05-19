@@ -9,13 +9,13 @@ note left BackEnd: общие функции для всех ролей на в�
 FrontEnd -> BackEnd: HTTP GET: request_user
 BackEnd -> SQL: PSQL: get_user
 SQL --> BackEnd: PSQL: user
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP: 200 OK [user]
 
 alt user not found
     FrontEnd -> BackEnd: HTTP GET: request_user
     BackEnd -> SQL: PSQL: get_user
     SQL --> BackEnd: PSQL: None
-    BackEnd --> FrontEnd: HTTP: 400 BadRequest ->request_user()
+    BackEnd --> FrontEnd: HTTP: 400 BadRequest:request_user[ObjectDoesNotExist]
 end
 
 == Выход пользователя ==
@@ -27,12 +27,12 @@ BackEnd -> SQL: PSQL: get user
 SQL --> BackEnd: PSQL: user
 BackEnd -> BackEnd: create_access_token
 BackEnd -> BackEnd: create_refresh_token
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP: 200 OK [Отправлены acces и refresh токены]
 alt incorrect email or password
 FrontEnd -> BackEnd: HTTP POST: login_by_jwt
 BackEnd -> SQL: PSQL: get user
 SQL --> BackEnd: PSQL: None
-BackEnd --> FrontEnd: HTTP: 400 BadRequest "Incorrect email or password"
+BackEnd --> FrontEnd: HTTP: 400 BadRequest [Incorrect email or password]
 end
 == Аутентификация польователя через gmail == 
 FrontEnd -> BackEnd: HTTP POST: login_by_gmail
@@ -45,66 +45,75 @@ end
 
 == Общие ошибки == 
 group Exeptions
-alt usern not authenticated
+alt user not authenticated
     FrontEnd -> BackEnd: HTTP GET: request_user
     BackEnd --> FrontEnd: HTTP: 401 Unathorized
     note left BackEnd: Юзер не авторизовался
+end
+alt object not found
+    FrontEnd -> BackEnd: HTTP GET: request_any_object
+    BackEnd -> SQL: PSQL: get object
+    SQL --> BackEnd: PSQL: None
+    BackEnd --> FrontEnd: HTTP 400 BadRequest [ObjectDoesNotExist]
 end
 end
 
 note left BackEnd: сотрудник
 == Получить активную оценку ==
 
-FrontEnd -> BackEnd: HTTP GET: get_review
-BackEnd -> SQL: PSQL: get review
-SQL --> BackEnd: PSQL: review
-BackEnd --> FrontEnd: HTTP: 200 OK
-FrontEnd -> BackEnd: HTTP GET: get_feedback_request
 
-alt Если есть фидбек
-BackEnd -> SQL: PSQL: get feedback
-SQL --> BackEnd: PSQL: feedback
-BackEnd --> FrontEnd: HTTP 200 OK
-FrontEnd -> BackEnd: HTTP GET: get_my_feedback
-alt Если есть список моих фидбеков
-BackEnd -> SQL: PSQL: get my feedback
-SQL --> BackEnd: PSQL: my feedback
-BackEnd --> FrontEnd: HTTP 200 OK
-else Если моих фидбеков нет
-BackEnd -> SQL: PSQL: get my feedback
+
+FrontEnd -> BackEnd: HTTP GET: get_review
+alt Получить оценку
+BackEnd -> BackEnd: get_my_review
+alt Ecли есть список моих запросов
+BackEnd -> SQL: PSQL: get my review
+SQL --> BackEnd: PSQL: my review
+BackEnd -> BackEnd: get_review_request
+alt Если есть список запросов фидбека
+BackEnd -> SQL: PSQL: get review request
+SQL --> BackEnd: PSQL: review request
+BackEnd --> FrontEnd: HTTP 200 OK [Получена активная оценка]
+else Если списка запросов фидбека нет
+BackEnd -> SQL: PSQL: get review request
 SQL --> BackEnd: PSQL: None
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP 400 Bad Request [Нет списка запросов фидбека]
+end
+else Нет списка моих фидбеков
+BackEnd -> SQL: PSQL: get my review
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP 400 Bad Request [Нет списка моих фидбеков]
 end
 
-else Если запроса фидбека нет
-BackEnd -> SQL: PSQL: get feedback
+else Нет оценки
+BackEnd -> SQL: PSQL: get review
 SQL --> BackEnd: PSQL: None
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP  400 Bad Request [Нет оценки]
 end
 
 == Получить список пользователей, которым я могу отправить запрос на фидбэк == 
 FrontEnd ->  BackEnd: HTTP GET: get_users_list 
 BackEnd -> SQL: PSQL: get users
 SQL --> BackEnd: PSQL: users
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP: 200 OK [Отправлен список пользователей]
 
 == Создать запроса фидбека ==
 FrontEnd -> BackEnd: HTTP POST: create_review
 BackEnd -> SQL: PSQL: create review
 SQL --> BackEnd: PSQL: review created
-BackEnd --> FrontEnd: HTTP: 201 Created
+BackEnd --> FrontEnd: HTTP: 201 Created [Был создан review]
 
 == Получить список моих фидбэков (вопросы - ответы) ==
-FrontEnd -> BackEnd: HTTP GET: get_my_feedback
+FrontEnd -> BackEnd: HTTP GET: get_my_review
 BackEnd -> SQL: PSQL: get my feedback
 SQL --> BackEnd: PSQL: my feedback
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP: 200 OK [Отправлен список фидбеков пользователя]
 
 == Получить список запросов фидбэка, которые прислали мне ==
-FrontEnd -> BackEnd: HTTP GET: get_feedback_request
+FrontEnd -> BackEnd: HTTP GET: get_review_request
 BackEnd -> SQL: PSQL: get feedback
 SQL --> BackEnd: PSQL: feedback
-BackEnd --> FrontEnd: HTTP: 200 OK
+BackEnd --> FrontEnd: HTTP: 200 OK [Отправлен список запросов фидбэка]
 
 == Получить список вопросов по запросу фидбэка == 
 FrontEnd -> BackEnd: HTTP GET: get_questions_by_review
@@ -113,8 +122,45 @@ SQL --> BackEnd: PSQL: questions
 BackEnd --> FrontEnd: HTTP: 200 OK
 
 == Сохринть фидбэк в draft == 
+FrontEnd -> BackEnd: HTTP POST: save_review_as_draft
+BackEnd -> SQL: PSQL: review is draft
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP: 201 Created
+== Отправить фидбэк == 
+FrontEnd -> BackEnd: HTTP POST: save_review
+BackEnd -> SQL: PSQL: save review
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP: 201 Created
+note across: Лид, ментор, админ
 
-== Отправить филбэк == 
 
-note left BackEnd: Админ
+
+note across: Админ
+== Получить список всех пользователей ==
+FrontEnd -> BackEnd: HTTP GET: get_all_users
+alt Пользователь имеет права администратора
+BackEnd -> SQL: PSQL get users
+SQL --> BackEnd: PSQL users
+BackEnd --> FrontEnd: HTTP 200 OK [Users]
+else Пользователь не имеет прав администратора 
+BackEnd --> FrontEnd: HTTP 403 ForbiddenError 
+end
+== Получить пользователя для редактирования ==
+FrontEnd -> BackEnd: HTTP GET: get_user
+alt Пользователь имеет права администратора
+BackEnd -> SQL: PSQL get user
+SQL --> BackEnd: PSQL user
+BackEnd --> FrontEnd: HTTP 200 OK [User]
+else Пользователь не имеет прав администратора 
+BackEnd --> FrontEnd: HTTP 403 ForbiddenError 
+end
+== Сохранить пользователя == 
+FrontEnd -> BackEnd: HTTP PUT/PATCH: update_user
+alt Пользователь имеет права администратора
+BackEnd -> SQL: PSQL get user
+SQL --> BackEnd: PSQL None
+BackEnd --> FrontEnd: HTTP 200 OK [User updated]
+else Пользователь не имеет прав администратора 
+BackEnd --> FrontEnd: HTTP 403 ForbiddenError 
+end
 @enduml
