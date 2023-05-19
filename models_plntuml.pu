@@ -15,7 +15,7 @@ map Question {
 
 map User {
     id => PK
-    template_id => FK
+    department_id => FK
     full_name => 
     username =>
     email =>
@@ -25,32 +25,53 @@ map User {
 
 map Answer{
     id => PK
-    user_id => FK 
-    answer_id => FK
-    question_id => FK
+    answer =>
 }
 
-map Review {
+map ReviewCretedByAdmin {
     id => PK
-    users_id => FK
-    custom_template_id => FK
-    answer_ids => FK 
+    user_id => FK
+    template_id => FK
+    user_answer_id => FK
     is_draft =>
+    created_at =>
 }
 
 map Quarter_review {
     id => PK
     review_id => FK
-    period =>
+    quarter =>
 }
 
-Template --> Review::template_id
-Question --> Template::question_id
-Question --> Answer::question_id
-Template --> User::template_id
-User --> Review::user_id
-Answer --> Review::answer_id
-Review --> Quarter_review::review_id
+map UserReview {
+    id => PK
+    user_id => FK
+    review_id => FK
+}
+
+map UserAnswer {
+    id => PK
+    user_id => FK
+    answer_id => FK
+
+}
+
+map Department {
+    id => PK
+    template_id => FK
+    department_name =>
+}
+
+User::id "От одного" --o "К многим" UserReview::user_id
+User::id "От одного" --o "к одному" UserAnswer::user_id
+Department::id "От одного" --o "к многим" User::department_id
+Template::id "От одного" --o "к одному" Department::template_id
+Template::id "От одного" --o "к многим" ReviewCretedByAdmin::template_id
+Question::id "От многих" --o "к одному" Template::question_id
+Answer::id "От многих" --o "к одному" UserAnswer::answer_id
+UserAnswer::id "От одного" --o "к одному" ReviewCretedByAdmin::user_answer_id
+ReviewCretedByAdmin::id "От многих" --o "к одному" Quarter_review::review_id
+
 
 
 @enduml
