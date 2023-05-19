@@ -5,6 +5,7 @@ database SQL
 
 
 note left BackEnd: общие функции для всех ролей на всех экрана
+
 == Получение пользователя ==
 FrontEnd -> BackEnd: HTTP GET: request_user
 BackEnd -> SQL: PSQL: get_user
@@ -21,6 +22,7 @@ end
 == Выход пользователя ==
 FrontEnd -> BackEnd: HTTP POST: logout
 BackEnd --> FrontEnd: HTTP: 200 OK
+
 == Аутентификация пользователя email/password ==
 FrontEnd -> BackEnd: HTTP POST: login_by_jwt
 BackEnd -> SQL: PSQL: get user
@@ -34,6 +36,7 @@ BackEnd -> SQL: PSQL: get user
 SQL --> BackEnd: PSQL: None
 BackEnd --> FrontEnd: HTTP: 400 BadRequest [Incorrect email or password]
 end
+
 == Аутентификация польователя через gmail == 
 FrontEnd -> BackEnd: HTTP POST: login_by_gmail
 BackEnd --> FrontEnd: HTTP: 200 OK
@@ -41,7 +44,6 @@ alt incorrect email or password
 FrontEnd -> BackEnd: HTTP POST: login_by_gmail
 BackEnd --> FrontEnd: HTTP: 400 BadRequest "Incorrect email"
 end
-
 
 == Общие ошибки == 
 group Exeptions
@@ -59,10 +61,8 @@ end
 end
 
 note left BackEnd: сотрудник
+
 == Получить активную оценку ==
-
-
-
 FrontEnd -> BackEnd: HTTP GET: get_review
 alt Получить оценку
 BackEnd -> BackEnd: get_my_review
@@ -126,16 +126,64 @@ FrontEnd -> BackEnd: HTTP POST: save_review_as_draft
 BackEnd -> SQL: PSQL: review is draft
 SQL --> BackEnd: PSQL: None
 BackEnd --> FrontEnd: HTTP: 201 Created
+
 == Отправить фидбэк == 
 FrontEnd -> BackEnd: HTTP POST: save_review
 BackEnd -> SQL: PSQL: save review
 SQL --> BackEnd: PSQL: None
 BackEnd --> FrontEnd: HTTP: 201 Created
+
+== Я не работал с ним ==
+FrontEnd -> BackEnd: HTTP DELETE: delete_user_from_review
+BackEnd ->x SQL: PSQL: delete user
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP 200 OK
+
 note across: Лид, ментор, админ
+== Поулчить список запросов фидбэка пользователей в зависимости от роли ==
+FrontEnd -> BackEnd: HTTP GET: get_review_request
+BackEnd -> SQL: PSQL: get review
+SQL --> BackEnd: PSQL: review
+BackEnd -> SQL: PSQL: get users
+SQL --> BackEnd: PSQL: users
+BackEnd -> BackEnd: users.annotate(count(User review))
+BackEnd --> FrontEnd: HTTP 200 OK [Users]
 
+== Получить список фидбэков с ответами по каждому ответившему пользователю ==
+FrontEnd -> BackEnd: HTTP GET: get_users
+BackEnd -> SQL: PSQL: get users
+SQL --> BackEnd: PSQL: users
+BackEnd -> BackEnd: filter_and_flag_user_by_role
+BackEnd --> FrontEnd: HTTP 200 OK [List of users with flags]
 
+FrontEnd -> BackEnd: HTTP GET: get_templates
+BackEnd -> SQL: PSQL: get templates
+SQL --> BackEnd: PSQL: templates
+
+FrontEnd -> BackEnd: HTTP POST: save_review
+BackEnd -> SQL: PSQL: save review
+SQL --> BackEnd: PSQL: None
+BackEnd --> FrontEnd: HTTP 201 Created
+
+== Создать шаблон ==
+FrontEnd -> BackEnd: HTTP POST: create_template
+BackEnd -> SQL: PSQL: create template
+SQL --> BackEnd: None
+BackEnd --> FrontEnd: HTTP 201 Created
+
+== Изменить шаблон == 
+FrontEnd -> BackEnd: HTTP GET: get_templates
+BackEnd -> SQL: get templates
+SQL --> BackEnd: templates
+BackEnd --> FrontEnd: HTTP 200 OK [templates]
+
+FrontEnd -> BackEnd: HTTP PUT/PATCH: updated_template
+BackEnd -> SQL: update template
+SQL --> BackEnd: None
+BackEnd --> FrontEnd: HTTP 200 OK [Template was updated]
 
 note across: Админ
+
 == Получить список всех пользователей ==
 FrontEnd -> BackEnd: HTTP GET: get_all_users
 alt Пользователь имеет права администратора
@@ -145,6 +193,7 @@ BackEnd --> FrontEnd: HTTP 200 OK [Users]
 else Пользователь не имеет прав администратора 
 BackEnd --> FrontEnd: HTTP 403 ForbiddenError 
 end
+
 == Получить пользователя для редактирования ==
 FrontEnd -> BackEnd: HTTP GET: get_user
 alt Пользователь имеет права администратора
@@ -154,13 +203,15 @@ BackEnd --> FrontEnd: HTTP 200 OK [User]
 else Пользователь не имеет прав администратора 
 BackEnd --> FrontEnd: HTTP 403 ForbiddenError 
 end
+
 == Сохранить пользователя == 
 FrontEnd -> BackEnd: HTTP PUT/PATCH: update_user
 alt Пользователь имеет права администратора
-BackEnd -> SQL: PSQL get user
+BackEnd -> SQL: PSQL updated user
 SQL --> BackEnd: PSQL None
 BackEnd --> FrontEnd: HTTP 200 OK [User updated]
 else Пользователь не имеет прав администратора 
 BackEnd --> FrontEnd: HTTP 403 ForbiddenError 
 end
+
 @enduml
