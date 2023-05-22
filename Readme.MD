@@ -1,3 +1,3 @@
 
 
-![Диаграмма сущностей](./images/models.png)
+![Диаграмма сущностей](./images/models.jpg)
