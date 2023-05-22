@@ -4,7 +4,7 @@ participant BackEnd
 database SQL
 
 
-note left BackEnd: общие функции для всех ролей на всех экрана
+note across: общие функции для всех ролей на всех экрана
 
 == Получение пользователя ==
 FrontEnd -> BackEnd: HTTP GET: request_user
@@ -50,7 +50,6 @@ group Exeptions
 alt user not authenticated
     FrontEnd -> BackEnd: HTTP GET: request_user
     BackEnd --> FrontEnd: HTTP: 401 Unathorized
-    note left BackEnd: Юзер не авторизовался
 end
 alt object not found
     FrontEnd -> BackEnd: HTTP GET: request_any_object
@@ -58,9 +57,15 @@ alt object not found
     SQL --> BackEnd: PSQL: None
     BackEnd --> FrontEnd: HTTP 400 BadRequest [ObjectDoesNotExist]
 end
+alt С фронта пришли данные не по шаблону для методов сохранения/изменения
+FrontEnd -> BackEnd: HTTP POST/PUT/PATCH
+BackEnd --> FrontEnd: HTTP 422 Unprocessable Content
 end
-
-note left BackEnd: сотрудник
+alt Использование запрещённых методов
+FrontEnd -> BackEnd: HTTP GET/POST/PUT/PATCH/DELETE
+BackEnd --> FrontEnd: HTTP 405 Method Not Allowed
+end
+note across: сотрудник
 
 == Получить активную оценку ==
 FrontEnd -> BackEnd: HTTP GET: get_review
@@ -135,9 +140,9 @@ BackEnd --> FrontEnd: HTTP: 201 Created
 
 == Я не работал с ним ==
 FrontEnd -> BackEnd: HTTP DELETE: delete_user_from_review
-BackEnd ->x SQL: PSQL: delete user
+BackEnd ->x SQL: PSQL: delete review
 SQL --> BackEnd: PSQL: None
-BackEnd --> FrontEnd: HTTP 200 OK
+BackEnd --> FrontEnd: HTTP 204 No Content
 
 note across: Лид, ментор, админ
 == Поулчить список запросов фидбэка пользователей в зависимости от роли ==

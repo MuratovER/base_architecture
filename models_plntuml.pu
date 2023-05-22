@@ -28,9 +28,14 @@ map Answer{
     answer =>
 }
 
-map ReviewCretedByAdmin {
+map UserReview {
     id => PK
     user_id => FK
+    review_id => FK
+}
+
+map Review{
+    id => PK
     template_id => FK
     user_answer_id => FK
     is_draft =>
@@ -66,12 +71,13 @@ User::id "От одного" --o "К многим" UserReview::user_id
 User::id "От одного" --o "к одному" UserAnswer::user_id
 Department::id "От одного" --o "к многим" User::department_id
 Template::id "От одного" --o "к одному" Department::template_id
-Template::id "От одного" --o "к многим" ReviewCretedByAdmin::template_id
+Template::id "От одного" --o "к многим" Review::template_id
 Question::id "От многих" --o "к одному" Template::question_id
 Answer::id "От многих" --o "к одному" UserAnswer::answer_id
-UserAnswer::id "От одного" --o "к одному" ReviewCretedByAdmin::user_answer_id
-ReviewCretedByAdmin::id "От многих" --o "к одному" Quarter_review::review_id
-
+UserAnswer::id "От одного" --o "к одному" Review::user_answer_id
+Review::id "От многих" --o "к одному" Quarter_review::review_id
+User::id "от многих" --o "к одному" UserReview::user_id
+Review::id "от мнгоих" --o  "к одному" UserReview::id
 
 
 @enduml
